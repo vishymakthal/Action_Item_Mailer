@@ -167,16 +167,27 @@ def main():
     ieee_email_address = "ncsu.ieee@gmail.com"
 
     #Change this line if using a new spreadsheet
-    spreadsheet_id = '1z0hHNCdUFggiGwBe_qYFMw63cE1-UYCGDTwXVfzeZw0'
+    spreadsheet_id = '1nMpPGcP2-91aEAETmzyxaUqPVIRft82P0zag1XY37C0'
 
     result = sheets_service.spreadsheets().values().get(
-        spreadsheetId=spreadsheet_id, range='A1:E').execute()
+        spreadsheetId=spreadsheet_id, range='A2:E').execute()
 
     action_items = result['values']
 
-    for line in action_items:
+    if not action_items:
+        return
 
-        officer_and_tasks = line
+    officer_and_tasks = {}
+    for line in action_items:
+        print(line)
+        officer_email = line[1]
+        if officer_and_tasks.get(officer_email, False):
+            officer_and_tasks[officer_email].append('{} - Due by {}'.format(line[0],line[2]))
+        else:
+            officer_and_tasks[officer_email] = ['{} - Due by {}'.format(line[0],line[2])]
+
+    for officer in officer_and_tasks:
+
 
         msg = '''
 
@@ -187,29 +198,27 @@ def main():
         '''
         #The start of the email to the current officer
 
-        task_counter = 1 #initialize a counter for the number of tasks, serves as the index
 
-        print(officer_and_tasks)
-
-        officer_email = officer_and_tasks[0]
-
-        while task_counter < len(officer_and_tasks): #go through the officer's tasks
+        for task in officer_and_tasks[officer]: #go through the officer's tasks
             msg += '<li>'
-            msg += officer_and_tasks[task_counter]
-            msg += '</li>'
-            task_counter += 1
+            msg += task
+            msg += '</li>\n'
 
         msg += '''
 
                 </ul>
             <hr/>
-            <p>Thanks for your commitment to NC State IEEE!</p>
+            <br/>
+            <i> Be sure to update the <a href="https://trello.com/b/VuRP6RUa/tasks"> Trello Board </a> as you make progress on your tasks. </i>
+            <br/>
+            <br/>
+            <p>Thanks for your commitment to IEEE at NC State!</p>
 
         </html>
 
         '''
-
-        send_message(service,ieee_email_address,create_html_message(ieee_email_address,officer_email,"IEEE Action Items (Testing)",msg))
+        print(officer)
+        send_message(service,ieee_email_address,create_html_message(ieee_email_address,officer,"IEEE Action Items (Testing)",msg))
 
 if __name__ == '__main__':
     main()
