@@ -54,7 +54,7 @@ pytz==2018.5
 pyxdg==0.25
 PyYAML==3.12
 requests==2.18.4
-rsa==4.0
+rsa==4.7
 six==1.11.0
 texttable==0.9.1
 Unidecode==1.0.22
